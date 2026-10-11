@@ -1,5 +1,5 @@
 // Service Worker dla aplikacji WP2 Plan
-const CACHE_NAME = 'wp2-plan-v1';
+const CACHE_NAME = 'wp2-plan-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',

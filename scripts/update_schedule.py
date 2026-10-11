@@ -18,6 +18,7 @@ import requests
 from bs4 import BeautifulSoup
 
 SCHEDULE_PAGE_URL = "https://wm.pollub.pl/plany-zajec"
+EXACT_PDF_URL = "https://wm.pollub.pl/download/BPRE9FhwKMRsKEFpSUARTAX93R3cZUSZQW1kGNQgcJRFsc3QRfFEIET8uBhcMNxtRQw1pdFd5FwM1Ul1pHTV1T2MHZmBkH3IeFwc1KEFOWiwXRgJFIjEBPFodElxUU1Z9dQUgQTM_Mmw5F1pZcnZBWFoeF0cSXiQvKjxRUW4XCQJWfXUGJEEgOCVWcklaBSIrDQBaRFBFAEMjY093Uxo4UEtqWyElGitWNSU1b39GJEwgKD9bHA0BVhNeOzUcOlsvewEIByh-ZkYdHGdlGhxyX1oFOSgGVkJKBUVQaHkeBzpeLC5cVVcrY2FYcwR4ISJVcl9aDzEqBFZCSgJZQ0o/wp1_2_rok_zima_26-27.pdf"
 OUTPUT_JSON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "schedule.json"))
 
 # Domyślne nagłówki udające nowoczesną przeglądarkę
@@ -45,7 +46,10 @@ DAYS_MAP = {
 
 
 def find_pdf_url() -> str:
-    """Szuka na stronie wydziałowej linku do planu dla Wzornictwa 2. rok."""
+    """Zwraca bezpośredni link do planu dla Wzornictwa 2. rok."""
+    if EXACT_PDF_URL:
+        print(f"[+] Używanie bezpośredniego adresu planu: {EXACT_PDF_URL}")
+        return EXACT_PDF_URL
     print(f"[*] Przeszukiwanie strony: {SCHEDULE_PAGE_URL}")
     try:
         response = requests.get(SCHEDULE_PAGE_URL, headers=HEADERS, timeout=20)
