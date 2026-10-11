@@ -1,0 +1,19 @@
+{
+  "name": "WP2 Plan - Wzornictwo Przemysłowe",
+  "short_name": "WP2 Plan",
+  "description": "Plan zajęć dla studentów Wzornictwa Przemysłowego (2. rok) Politechniki Lubelskiej",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6f0eb",
+  "theme_color": "#2d201d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>WP2 Plan • Politechnika Lubelska</title>
+
+    <!-- Konfiguracja PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#2d201d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon.svg" />
+
+    <style>
+      :root {
+        --bg: #f6f0eb;
+        --card: #fffdfb;
+        --primary: #2d201d;
+        --primary-2: #47322f;
+        --accent: #d9895d;
+        --accent-soft: #f5d4bb;
+        --text: #2d201d;
+        --muted: #71615d;
+        --border: #eadfd7;
+        --success: #6c926d;
+        --warning: #d8a443;
+        --danger: #bf685b;
+        --shadow: rgba(56, 37, 33, 0.08);
+        --project: #d98d5f;
+        --lecture: #7a9bb8;
+        --lab: #7aa67d;
+        --studio: #a57ab7;
+        --seminar: #d98c7a;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      .app {
+        width: 100%;
+        max-width: 480px;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #f4ebe5 0%, #f7f2ef 100%);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2a1f1e 0%, #3d2b29 100%);
+        color: white;
+        padding: 22px 20px 18px;
+        border-bottom-left-radius: 28px;
+        border-bottom-right-radius: 28px;
+        box-shadow: 0 8px 24px rgba(45, 32, 29, 0.15);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .brand {
+        font-weight: 700;
+        font-size: 1.15rem;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .top-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .chip {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        color: #f6e8df;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .chip:hover {
+        background: rgba(255,255,255,0.22);
+      }
+
+      .sync-btn {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 999px;
+        color: #f6e8df;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .sync-btn.rotating {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        100% { transform: rotate(360deg); }
+      }
+
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 14px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: 1.85rem;
+        line-height: 1.1;
+      }
+
+      .date {
+        color: #f3d7c8;
+        margin-top: 6px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .sync-indicator {
+        font-size: 0.72rem;
+        opacity: 0.85;
+      }
+
+      .badge {
+        background: var(--accent-soft);
+        color: var(--primary);
+        border-radius: 14px;
+        padding: 10px 14px;
+        font-weight: 800;
+        min-width: 68px;
+        text-align: center;
+        font-size: 1.1rem;
+      }
+
+      .badge span {
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* Pasek filtrów (Tydzień i Grupa) */
+      .filters-bar {
+        margin-top: 14px;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .filter-pill {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #f3ece8;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .filter-pill.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+        font-weight: 700;
+      }
+
+      .content {
+        padding: 20px 18px 100px;
+        flex: 1;
+      }
+
+      .screen {
+        display: none;
+      }
+
+      .screen.active {
+        display: block;
+      }
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 18px 0 12px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+
+      .link-btn {
+        background: transparent;
+        border: none;
+        color: var(--accent);
+        font-weight: 700;
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.88rem;
+      }
+
+      .next-class {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 18px;
+        box-shadow: 0 10px 20px var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .next-class::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 6px;
+        height: 100%;
+        background: var(--accent);
+      }
+
+      .class-time {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .class-name {
+        font-size: 1.25rem;
+        font-weight: 800;
+        line-height: 1.25;
+      }
+
+      .class-meta {
+        margin-top: 14px;
+        color: var(--muted);
+        display: grid;
+        gap: 6px;
+        font-size: 0.92rem;
+      }
+
+      .class-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .lesson {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 12px 14px;
+        box-shadow: 0 4px 10px rgba(39, 30, 29, 0.03);
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+
+      .lesson.clickable {
+        cursor: pointer;
+      }
+
+      .lesson.clickable:active {
+        transform: scale(0.98);
+      }
+
+      .time-box {
+        min-width: 62px;
+        border-radius: 12px;
+        text-align: center;
+        padding: 8px 6px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: white;
+      }
+
+      .lesson-info {
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .lesson-name {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .lesson-sub {
+        color: var(--muted);
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .tags-row {
+        display: flex;
+        gap: 4px;
+        margin-top: 4px;
+      }
+
+      .tag-mini {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 6px;
+        background: #f0e6de;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .status {
+        padding: 5px 8px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .status.upcoming { background: #eef5ef; color: var(--success); }
+      .status.live { background: #fff1da; color: var(--warning); }
+      .status.done { background: #f7eeec; color: var(--danger); }
+
+      .empty-box {
+        background: var(--card);
+        border: 1px dashed var(--border);
+        border-radius: 16px;
+        padding: 30px 20px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .week-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .day-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 4px 12px rgba(35, 25, 23, 0.03);
+      }
+
+      .day-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .day-name {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .day-count {
+        font-size: 0.72rem;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .slot {
+        margin-bottom: 8px;
+        border-left: 4px solid var(--project);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #fff8f3;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .slot:last-child {
+        margin-bottom: 0;
+      }
+
+      .slot-name {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .slot-meta {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+
+      .detail-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(35, 25, 23, 0.05);
+      }
+
+      .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .subject-tag {
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: white;
+      }
+
+      .subject-tag.project { background: var(--project); }
+      .subject-tag.lecture { background: var(--lecture); }
+      .subject-tag.lab { background: var(--lab); }
+      .subject-tag.studio { background: var(--studio); }
+      .subject-tag.seminar { background: var(--seminar); }
+
+      .subject-name {
+        font-size: 1.45rem;
+        margin: 14px 0 12px;
+        font-weight: 800;
+        line-height: 1.25;
+      }
+
+      .meta-list {
+        display: grid;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .info-box {
+        margin-top: 20px;
+        padding: 14px 14px;
+        background: #fbf6f2;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+
+      .info-box h4 {
+        margin: 0 0 8px;
+        font-size: 0.95rem;
+        color: var(--primary);
+      }
+
+      .info-box ul {
+        margin: 0;
+        padding-left: 20px;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.6;
+      }
+
+      .nav {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 480px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: rgba(43, 31, 29, 0.97);
+        color: white;
+        padding: 10px 0 12px;
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+        z-index: 100;
+      }
+
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: none;
+        background: transparent;
+        color: white;
+        font-size: 0.72rem;
+        gap: 4px;
+        opacity: 0.6;
+        cursor: pointer;
+        flex: 1;
+        transition: opacity 0.2s;
+      }
+
+      .nav-item.active {
+        opacity: 1;
+        font-weight: 700;
+        color: #f7d2bc;
+      }
+
+      /* Modal ustawień i synchronizacji */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal {
+        background: var(--card);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 400px;
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      }
+
+      .modal h3 {
+        margin-top: 0;
+        margin-bottom: 14px;
+        font-size: 1.2rem;
+      }
+
+      .modal-field {
+        margin-bottom: 16px;
+      }
+
+      .modal-field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .modal select, .modal input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-size: 0.9rem;
+      }
+
+      .btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 700;
+        width: 100%;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="topbar">
+          <div class="brand">
+            <span>WP2 Plan</span>
+          </div>
+          <div class="top-actions">
+            <button class="chip" id="groupChip" title="Zmień grupę">Grupa 1 • 2 rok</button>
+            <button class="sync-btn" id="syncBtn" title="Sprawdź aktualizacje planu">🔄</button>
+          </div>
+        </div>
+
+        <div class="hero">
+          <div>
+            <h1 id="screenTitle">Plan zajęć</h1>
+            <div class="date">
+              <span id="headerDate">Dziś</span>
+              <span>•</span>
+              <span class="sync-indicator" id="syncStatus">Gotowy offline</span>
+            </div>
+          </div>
+          <div class="badge" id="todayBadge">
+            <div id="todayCount">0</div>
+            <span>zajęcia</span>
+          </div>
+        </div>
+
+        <!-- Filtry Tygodnia (A/B) i Dnia -->
+        <div class="filters-bar">
+          <div class="filter-pill active" data-week="auto" id="pillWeekAuto">Tydzień: Auto</div>
+          <div class="filter-pill" data-week="A">Tydzień A</div>
+          <div class="filter-pill" data-week="B">Tydzień B</div>
+          <div class="filter-pill" data-week="all">Wszystkie</div>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- EKRAN DZIŚ -->
+        <section id="homeScreen" class="screen active">
+          <div class="section-title">
+            <span>Najbliższe zajęcia</span>
+            <button class="link-btn" data-target="week">Cały tydzień →</button>
+          </div>
+
+          <div class="next-class" id="nextClassContainer">
+            <div class="class-time" id="nextLessonTime">--:-- – --:--</div>
+            <div class="class-name" id="nextLessonName">Brak kolejnych zajęć na dziś</div>
+            <div class="class-meta" id="nextLessonMeta">
+              <div>📍 <span id="nextLessonRoom">Sprawdź plan tygodnia</span></div>
+              <div>👨‍🏫 <span id="nextLessonTeacher">-</span></div>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <span>Harmonogram na dziś</span>
+            <span style="font-size: 0.8rem; font-weight: normal; color: var(--muted);" id="currentDayLabel"></span>
+          </div>
+
+          <div class="class-list" id="todayList"></div>
+        </section>
+
+        <!-- EKRAN TYGODNIA -->
+        <section id="weekScreen" class="screen">
+          <div class="section-title">
+            <span>Rozkład tygodniowy</span>
+            <button class="link-btn" data-target="home">← Wróć do dziś</button>
+          </div>
+
+          <div class="week-grid" id="weekGrid"></div>
+        </section>
+
+        <!-- EKRAN SZCZEGÓŁÓW PRZEDMIOTU -->
+        <section id="detailScreen" class="screen">
+          <div class="section-title">
+            <span>Szczegóły przedmiotu</span>
+            <button class="link-btn" data-target="week">← Wróć</button>
+          </div>
+
+          <div class="detail-card" id="detailCard"></div>
+        </section>
+      </main>
+
+      <!-- DOLNA NAWIGACJA -->
+      <nav class="nav">
+        <button class="nav-item active" data-target="home">
+          <span>🏠</span>
+          <span>Dziś</span>
+        </button>
+        <button class="nav-item" data-target="week">
+          <span>📅</span>
+          <span>Tydzień</span>
+        </button>
+        <button class="nav-item" data-target="detail">
+          <span>📘</span>
+          <span>Przedmiot</span>
+        </button>
+        <button class="nav-item" id="navSettings">
+          <span>⚙️</span>
+          <span>Opcje</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- MODAL USTAWIEŃ -->
+    <div class="modal-overlay" id="settingsModal">
+      <div class="modal">
+        <h3>Ustawienia planu</h3>
+        
+        <div class="modal-field">
+          <label>Twoja grupa ćwiczeniowa/projektowa:</label>
+          <select id="selectUserGroup">
+            <option value="1">Grupa 1</option>
+            <option value="2">Grupa 2</option>
+            <option value="all">Wszystkie grupy (brak filtra)</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label>Automatyczna synchronizacja:</label>
+          <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 8px;">
+            Aplikacja pobiera najświeższy plan z pliku <code>schedule.json</code> wygenerowanego przez GitHub Actions.
+          </div>
+          <button class="btn" id="modalSyncBtn" style="background: var(--accent);">Pobierz najnowszy plan teraz</button>
+        </div>
+
+        <div class="modal-field" style="margin-top: 16px;">
+          <label>Ostatnia aktualizacja danych:</label>
+          <div id="lastUpdatedInfo" style="font-size: 0.82rem; color: var(--muted);">Sprawdzanie...</div>
+        </div>
+
+        <button class="btn" id="closeSettingsBtn" style="margin-top: 14px;">Zapisz i zamknij</button>
+      </div>
+    </div>
+
+    <script>
+      // Domyślne dane awaryjne (w razie braku sieci i czystej pamięci podręcznej)
+      const fallbackSchedule = [
+        {
+          id: 1,
+          name: "Rysunek i forma",
+          type: "studio",
+          day: "Piątek",
+          start: "08:00",
+          end: "09:30",
+          room: "Sala 102",
+          teacher: "dr A. Nowak",
+          week: "all",
+          group: "all",
+          description: "Ćwiczenia z rysunku projektowego i analizy formy użytkowej.",
+          note: "Narysować 3 koncepcje obudowy produktu na podstawie inspo z biomorfiki."
+        },
+        {
+          id: 2,
+          name: "Projektowanie produktu",
+          type: "project",
+          day: "Piątek",
+          start: "09:45",
+          end: "11:15",
+          room: "Sala 214 / pracownia",
+          teacher: "dr hab. M. Kowalski",
+          week: "all",
+          group: "1",
+          description: "Krytyka koncepcji i rozwój prototypów użytkowych.",
+          note: "Prezentacja modelu 1:1 oraz omówienie ergonomii i użytkowania."
+        },
+        {
+          id: 3,
+          name: "Materiały i technologie",
+          type: "lab",
+          day: "Piątek",
+          start: "13:15",
+          end: "14:45",
+          room: "Laboratorium 3",
+          teacher: "mgr K. Zielińska",
+          week: "A",
+          group: "all",
+          description: "Właściwości materiałów i dobór do koncepcji produktów.",
+          note: "Porównanie tworzyw kompozytowych, drewna i metalu w zastosowaniach praktycznych."
+        },
+        {
+          id: 4,
+          name: "Kompozycja przestrzenna",
+          type: "lecture",
+          day: "Poniedziałek",
+          start: "09:00",
+          end: "10:30",
+          room: "Aula B",
+          teacher: "prof. J. Kwiatkowska",
+          week: "all",
+          group: "all",
+          description: "Teoria kompozycji, proporcji i hierarchii wizualnej.",
+          note: "Analiza układów form mieszkalnych i wyposażenia użytkowego."
+        },
+        {
+          id: 5,
+          name: "Modelowanie 3D / CAD",
+          type: "lab",
+          day: "Wtorek",
+          start: "11:00",
+          end: "12:30",
+          room: "Laboratorium CAD",
+          teacher: "mgr P. Olszewski",
+          week: "all",
+          group: "2",
+          description: "Tworzenie modeli parametrycznych i renderów koncepcji.",
+          note: "Należy przygotować trzy warianty bryły dla projektu zespołowego."
+        },
+        {
+          id: 6,
+          name: "Ergonomia i użytkowanie",
+          type: "seminar",
+          day: "Środa",
+          start: "10:00",
+          end: "11:30",
+          room: "Sala 119",
+          teacher: "dr M. Szymańska",
+          week: "all",
+          group: "all",
+          description: "Badania użytkownika, ergonomia i analiza behawioru.",
+          note: "Konsultacja ankiet użytkowników i mapy potrzeb twórczych."
+        },
+        {
+          id: 7,
+          name: "Strategia produktu",
+          type: "project",
+          day: "Czwartek",
+          start: "12:15",
+          end: "13:45",
+          room: "Sala 305",
+          teacher: "dr E. Lis",
+          week: "B",
+          group: "all",
+          description: "Planowanie funkcji, segmentacji rynku i identyfikacji użytkownika.",
+          note: "Zdefiniowanie grupy docelowej i scenariuszy zastosowania."
+        },
+        {
+          id: 8,
+          name: "Warsztat prototypowania",
+          type: "studio",
+          day: "Czwartek",
+          start: "14:00",
+          end: "16:15",
+          room: "Studio modelarskie",
+          teacher: "mgr R. Dąbrowski",
+          week: "all",
+          group: "1",
+          description: "Budowa szybkich prototypów i testowanie formy.",
+          note: "Przygotować prosty mockup z papieru i tworzyw w 3 wersjach."
+        }
+      ];
+
+      // Stan aplikacji
+      let scheduleData = fallbackSchedule;
+      let userGroup = localStorage.getItem('wp2_user_group') || '1';
+      let selectedWeekFilter = 'auto'; // 'auto', 'A', 'B', 'all'
+      let selectedSubjectId = 1;
+      let activeScreen = 'home';
+
+      const polishDays = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+
+      // Obliczanie bieżącego tygodnia akademickiego (A / B)
+      function getCurrentWeekType() {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const pastDays = (now - startOfYear) / 86400000;
+        const weekNumber = Math.ceil((pastDays + startOfYear.getDay() + 1) / 7);
+        // Na Politechnice Lubelskiej tygodnie nieparzyste to zazwyczaj A, parzyste to B
+        return weekNumber % 2 !== 0 ? 'A' : 'B';
+      }
+
+      function getEffectiveWeek() {
+        if (selectedWeekFilter === 'auto') return getCurrentWeekType();
+        return selectedWeekFilter; // 'A', 'B' lub 'all'
+      }
+
+      function typeLabel(type) {
+        const labels = {
+          project: 'Projekt',
+          lecture: 'Wykład',
+          lab: 'Laboratorium',
+          studio: 'Studio',
+          seminar: 'Seminarium'
+        };
+        return labels[type] || 'Zajęcia';
+      }
+
+      function getTypeBackground(type) {
+        const map = {
+          project: '#d98d5f',
+          lecture: '#7a9bb8',
+          lab: '#7aa67d',
+          studio: '#a57ab7',
+          seminar: '#d98c7a'
+        };
+        return map[type] || '#d98d5f';
+      }
+
+      function getTypeLight(type) {
+        const map = {
+          project: '#fff3ee',
+          lecture: '#edf4fa',
+          lab: '#eef7ef',
+          studio: '#f8f1fb',
+          seminar: '#fff0ee'
+        };
+        return map[type] || '#fff3ee';
+      }
+
+      // Filtrowanie zajęć wg grupy i tygodnia
+      function filterSchedule(items) {
+        const currentWeek = getEffectiveWeek();
+        return items.filter(item => {
+          // Filtr grupy
+          const matchGroup = (userGroup === 'all') || (!item.group || item.group === 'all' || item.group === userGroup);
+          // Filtr tygodnia
+          const matchWeek = (currentWeek === 'all') || (!item.week || item.week === 'all' || item.week === currentWeek);
+          return matchGroup && matchWeek;
+        });
+      }
+
+      // Otwieranie widoku
+      function openScreen(name) {
+        activeScreen = name;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(name + 'Screen');
+        if (target) target.classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach(b => {
+          b.classList.toggle('active', b.dataset.target === name);
+        });
+
+        const titleEl = document.getElementById('screenTitle');
+        if (titleEl) {
+          titleEl.textContent = name === 'home' ? 'Plan zajęć' : name === 'week' ? 'Tydzień' : 'Szczegóły';
+        }
+        window.scrollTo(0, 0);
+      }
+
+      // Renderowanie widoku "Dziś"
+      function renderHome() {
+        const now = new Date();
+        const dayIdx = now.getDay();
+        const todayName = polishDays[dayIdx];
+
+        // Wyświetlanie daty w nagłówku
+        const formattedDate = now.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' });
+        document.getElementById('headerDate').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+        document.getElementById('currentDayLabel').textContent = `(${todayName})`;
+
+        // Filtrujemy zajęcia na dzień dzisiejszy (lub najbliższy dzień roboczy jeśli weekend)
+        let displayDay = todayName;
+        if (displayDay === 'Sobota' || displayDay === 'Niedziela') {
+          displayDay = 'Poniedziałek';
+          document.getElementById('currentDayLabel').textContent = `(Weekend • Najbliższy: Poniedziałek)`;
+        }
+
+        const filtered = filterSchedule(scheduleData);
+        const todayItems = filtered
+          .filter(item => item.day.toLowerCase() === displayDay.toLowerCase())
+          .sort((a, b) => a.start.localeCompare(b.start));
+
+        document.getElementById('todayCount').textContent = String(todayItems.length);
+
+        const listEl = document.getElementById('todayList');
+        const nextTimeEl = document.getElementById('nextLessonTime');
+        const nextNameEl = document.getElementById('nextLessonName');
+        const nextRoomEl = document.getElementById('nextLessonRoom');
+        const nextTeacherEl = document.getElementById('nextLessonTeacher');
+
+        if (todayItems.length > 0) {
+          const first = todayItems[0];
+          nextTimeEl.textContent = `${first.start} – ${first.end}`;
+          nextNameEl.textContent = first.name;
+          nextRoomEl.textContent = `${first.room} (${typeLabel(first.type)})`;
+          nextTeacherEl.textContent = first.teacher;
+
+          listEl.innerHTML = todayItems.map(item => `
+            <div class="lesson clickable" data-id="${item.id}">
+              <div class="time-box" style="background:${getTypeBackground(item.type)}">${item.start}</div>
+              <div class="lesson-info">
+                <div class="lesson-name">${item.name}</div>
+                <div class="lesson-sub">${item.room} • ${item.teacher}</div>
+                <div class="tags-row">
+                  <span class="tag-mini">${typeLabel(item.type)}</span>
+                  ${item.group !== 'all' ? `<span class="tag-mini">Gr. ${item.group}</span>` : ''}
+                  ${item.week !== 'all' ? `<span class="tag-mini">Tydz. ${item.week}</span>` : ''}
+                </div>
+              </div>
+              <div class="status upcoming">Dzisiaj</div>
+            </div>
+          `).join('');
+
+          listEl.querySelectorAll('.lesson').forEach(el => {
+            el.addEventListener('click', () => {
+              selectedSubjectId = Number(el.dataset.id);
+              renderDetail();
+              openScreen('detail');
+            });
+          });
+        } else {
+          nextTimeEl.textContent = '--:-- – --:--';
+          nextNameEl.textContent = 'Brak zaplanowanych zajęć';
+          nextRoomEl.textContent = 'Odpoczynek lub praca własna w pracowni';
+          nextTeacherEl.textContent = '-';
+
+          listEl.innerHTML = `
+            <div class="empty-box">
+              🌿 Brak zajęć dla wybranych filtrów w dniu dzisiejszym.<br/>
+              <span style="font-size:0.8rem; margin-top:8px; display:inline-block;">Możesz sprawdzić plan całego tygodnia poniżej.</span>
+            </div>
+          `;
+        }
+      }
+
+      // Renderowanie widoku "Tydzień"
+      function renderWeek() {
+        const grid = document.getElementById('weekGrid');
+        const days = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
+        const filtered = filterSchedule(scheduleData);
+
+        grid.innerHTML = days.map(day => {
+          const dayItems = filtered
+            .filter(item => item.day.toLowerCase() === day.toLowerCase())
+            .sort((a, b) => a.start.localeCompare(b.start));
+
+          const blocks = dayItems.length ? dayItems.map(item => `
+            <div class="slot" data-id="${item.id}" style="border-left-color:${getTypeBackground(item.type)}; background:${getTypeLight(item.type)};">
+              <span class="slot-name">${item.name}</span>
+              <div class="slot-meta">
+                <span>🕒 ${item.start}–${item.end} • ${item.room}</span>
+                <span>${item.group !== 'all' ? 'Gr. ' + item.group : ''}</span>
+              </div>
+            </div>
+          `).join('') : '<div style="font-size:0.78rem; color:var(--muted); padding:8px 0;">Brak zajęć</div>';
+
+          return `
+            <div class="day-card">
+              <div class="day-header">
+                <span class="day-name">${day}</span>
+                <span class="day-count">${dayItems.length} zajęć</span>
+              </div>
+              ${blocks}
+            </div>
+          `;
+        }).join('');
+
+        grid.querySelectorAll('.slot').forEach(el => {
+          el.addEventListener('click', () => {
+            selectedSubjectId = Number(el.dataset.id);
+            renderDetail();
+            openScreen('detail');
+          });
+        });
+      }
+
+      // Renderowanie widoku szczegółów
+      function renderDetail() {
+        const item = scheduleData.find(s => s.id === selectedSubjectId) || scheduleData[0];
+        const card = document.getElementById('detailCard');
+        if (!item) return;
+
+        card.innerHTML = `
+          <div class="detail-header">
+            <div class="subject-tag ${item.type}">${typeLabel(item.type)}</div>
+            <div class="chip" style="background:#f3ece8; color:var(--primary); border:none;">${item.day}</div>
+          </div>
+          <div class="subject-name">${item.name}</div>
+
+          <div class="meta-list">
+            <div class="meta-item"><span>🕒</span> <span><strong>Godziny:</strong> ${item.start} – ${item.end}</span></div>
+            <div class="meta-item"><span>📍</span> <span><strong>Miejsce:</strong> ${item.room}</span></div>
+            <div class="meta-item"><span>👨‍🏫</span> <span><strong>Prowadzący:</strong> ${item.teacher}</span></div>
+            <div class="meta-item"><span>👥</span> <span><strong>Grupa:</strong> ${item.group === 'all' ? 'Wszyscy' : 'Grupa ' + item.group}</span></div>
+            <div class="meta-item"><span>📅</span> <span><strong>Tydzień:</strong> ${item.week === 'all' ? 'Każdy tydzień' : 'Tydzień ' + item.week}</span></div>
+            <div class="meta-item"><span>📌</span> <span><strong>Opis:</strong> ${item.description || 'Brak opisu'}</span></div>
+          </div>
+        `;
+      }
+
+      // Ładowanie i synchronizacja schedule.json
+      async function loadSchedule(forceRefresh = false) {
+        const syncBtn = document.getElementById('syncBtn');
+        const syncStatus = document.getElementById('syncStatus');
+        syncBtn.classList.add('rotating');
+        syncStatus.textContent = 'Pobieranie...';
+
+        try {
+          // Pobranie pliku schedule.json (z timestampem przy forceRefresh)
+          const url = forceRefresh ? `schedule.json?t=${Date.now()}` : 'schedule.json';
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          
+          const data = await resp.json();
+          if (data && Array.isArray(data.schedule) && data.schedule.length > 0) {
+            scheduleData = data.schedule;
+            localStorage.setItem('wp2_cached_schedule', JSON.stringify(data));
+            syncStatus.textContent = 'Zsynchronizowano';
+
+            if (data.metadata && data.metadata.last_updated) {
+              const dt = new Date(data.metadata.last_updated);
+              document.getElementById('lastUpdatedInfo').textContent = dt.toLocaleString('pl-PL');
+            }
+          }
+        } catch (err) {
+          console.warn('[Sync] Używanie pamięci podręcznej:', err);
+          const cached = localStorage.getItem('wp2_cached_schedule');
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              scheduleData = parsed.schedule || fallbackSchedule;
+              syncStatus.textContent = 'Z pamięci (offline)';
+              if (parsed.metadata?.last_updated) {
+                document.getElementById('lastUpdatedInfo').textContent = new Date(parsed.metadata.last_updated).toLocaleString('pl-PL');
+              }
+            } catch (e) {
+              scheduleData = fallbackSchedule;
+              syncStatus.textContent = 'Domyślny plan';
+            }
+          } else {
+            scheduleData = fallbackSchedule;
+            syncStatus.textContent = 'Domyślny plan';
+          }
+        } finally {
+          syncBtn.classList.remove('rotating');
+          updateGroupChip();
+          renderHome();
+          renderWeek();
+        }
+      }
+
+      function updateGroupChip() {
+        const label = userGroup === 'all' ? 'Wszystkie grupy' : `Grupa ${userGroup} • 2 rok`;
+        document.getElementById('groupChip').textContent = label;
+      }
+
+      // Obsługa nawigacji
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.id === 'navSettings') {
+            document.getElementById('settingsModal').classList.add('active');
+            return;
+          }
+          const target = btn.dataset.target;
+          if (target === 'detail') renderDetail();
+          openScreen(target);
+        });
+      });
+
+      document.querySelectorAll('.link-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          if (target === 'detail') renderDetail();
+          openScreen(target);
+        });
+      });
+
+      // Filtry tygodnia
+      document.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          selectedWeekFilter = pill.dataset.week;
+          renderHome();
+          renderWeek();
+        });
+      });
+
+      // Modal ustawień
+      document.getElementById('groupChip').addEventListener('click', () => {
+        document.getElementById('settingsModal').classList.add('active');
+      });
+      document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+        userGroup = document.getElementById('selectUserGroup').value;
+        localStorage.setItem('wp2_user_group', userGroup);
+        updateGroupChip();
+        renderHome();
+        renderWeek();
+        document.getElementById('settingsModal').classList.remove('active');
+      });
+      document.getElementById('settingsModal').addEventListener('click', (e) => {
+        if (e.target.id === 'settingsModal') {
+          document.getElementById('settingsModal').classList.remove('active');
+        }
+      });
+      document.getElementById('syncBtn').addEventListener('click', () => loadSchedule(true));
+      document.getElementById('modalSyncBtn').addEventListener('click', () => loadSchedule(true));
+
+      // Rejestracja Service Workera dla działania PWA na telefonie
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('[PWA] Service Worker zarejestrowany:', reg.scope))
+            .catch(err => console.log('[PWA] Błąd Service Workera:', err));
+        });
+      }
+
+      // Inicjalizacja
+      document.getElementById('selectUserGroup').value = userGroup;
+      const currentWeekAutoLabel = getCurrentWeekType();
+      document.getElementById('pillWeekAuto').textContent = `Tydzień: Auto (${currentWeekAutoLabel})`;
+
+      loadSchedule();
+    </script>
+  </body>
+</html>
