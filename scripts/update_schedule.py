@@ -46,61 +46,46 @@ DAYS_MAP = {
 
 
 def find_pdf_url() -> str:
-    """Zwraca bezpośredni link do planu dla Wzornictwa 2. rok."""
-    if EXACT_PDF_URL:
-        print(f"[+] Używanie bezpośredniego adresu planu: {EXACT_PDF_URL}")
-        return EXACT_PDF_URL
-    print(f"[*] Przeszukiwanie strony: {SCHEDULE_PAGE_URL}")
-    try:
-        response = requests.get(SCHEDULE_PAGE_URL, headers=HEADERS, timeout=20)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
-        
-        pdf_candidates = []
-        for a in soup.find_all("a", href=True):
-            href = a["href"].strip()
-            text = a.get_text(strip=True).lower()
-            if not href.lower().endswith(".pdf"):
-                continue
-            
-            # Pełny URL
-            full_url = href if href.startswith("http") else requests.compat.urljoin(SCHEDULE_PAGE_URL, href)
-            
-            # Sprawdź czy to wzornictwo i 2 rok
-            is_wp = "wp" in href.lower() or "wzornictw" in href.lower() or "wzornictw" in text
-            is_year_2 = "2_rok" in href.lower() or "rok_2" in href.lower() or "rok 2" in text or "2 rok" in text or "wp1_2" in href.lower()
-            
-            if is_wp and is_year_2:
-                print(f"[+] Znaleziono bezpośredni link do planu WP 2. rok: {full_url}")
-                return full_url
-            elif is_wp:
-                pdf_candidates.append(full_url)
-        
-        if pdf_candidates:
-            print(f"[!] Nie znaleziono jednoznacznego oznaczenia '2 rok', ale znaleziono kandydatów: {pdf_candidates}")
-            return pdf_candidates[0]
-            
-    except Exception as e:
-        print(f"[-] Ostrzeżenie podczas pobierania strony planów: {e}")
-
-    # Fallback: typowe wzorce ścieżek na serwerze pollub
-    current_year = datetime.now().year % 100
-    next_year = current_year + 1
-    fallback_urls = [
-        f"https://wm.pollub.pl/f/plany-zajec/{current_year}-{next_year}/wp1_2_rok_zima_{current_year}-{next_year}.pdf",
-        f"https://wm.pollub.pl/f/plany-zajec/{current_year}-{next_year}/wp1_2_rok_lato_{current_year}-{next_year}.pdf",
-        f"https://wm.pollub.pl/f/plany-zajec/26-27/wp1_2_rok_zima_26-27.pdf",
+    """
+    Automatycznie przeszukuje stronę wydziału w poszukiwaniu najnowszego planu dla Wzornictwa 2. rok.
+    Dzięki temu wykrywa nowe pliki wrzucone przez dziekanat w trakcie semestru.
+    """
+    scan_urls = [
+        "https://wm.pollub.pl/plany-zajec",
+        "https://wm.pollub.pl/studenci/plany-zajec"
     ]
-    for url in fallback_urls:
+    
+    for page_url in scan_urls:
+        print(f"[*] Przeszukiwanie strony wydziałowej: {page_url}")
         try:
-            head = requests.head(url, headers=HEADERS, timeout=10)
-            if head.status_code == 200:
-                print(f"[+] Działa link fallback: {url}")
-                return url
-        except Exception:
-            continue
-            
-    return fallback_urls[0]
+            response = requests.get(page_url, headers=HEADERS, timeout=20)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, "html.parser")
+                for a in soup.find_all("a", href=True):
+                    href = a["href"].strip()
+                    text = a.get_text(strip=True).lower()
+                    if not href.lower().endswith(".pdf") and "/download/" not in href.lower():
+                        continue
+                    
+                    full_url = href if href.startswith("http") else requests.compat.urljoin(page_url, href)
+                    
+                    # Wzornictwo przemysłowe + 2 rok
+                    is_wp = "wp" in href.lower() or "wzornictw" in href.lower() or "wzornictw" in text
+                    is_year_2 = ("2_rok" in href.lower() or "rok_2" in href.lower() or 
+                                 "wp1_2" in href.lower() or "2 rok" in text or "ii rok" in text or "rok ii" in text)
+                    
+                    if is_wp and is_year_2:
+                        print(f"[+] WYKRYTO AKTUALNY PLAN NA STRONIE UCZELNI: {full_url}")
+                        return full_url
+        except Exception as e:
+            print(f"[-] Błąd podczas skanowania {page_url}: {e}")
+
+    # Jeśli strona wydziału chwilowo nie odpowiada, użyj znanego bezpośredniego adresu
+    if EXACT_PDF_URL:
+        print(f"[+] Używanie bezpośredniego adresu awaryjnego: {EXACT_PDF_URL}")
+        return EXACT_PDF_URL
+
+    return ""
 
 
 def download_and_parse_pdf(pdf_url: str, local_file: str = None) -> list:
